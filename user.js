@@ -1,8 +1,10 @@
 class User {
-    constructor(email, pin, balance = 0) {
+    constructor(email, pin, balance = 0, failedAttempts = 0) {
         this.email = email;
         this.pin = pin;
         this.balance = balance;
+        this.failedAttempts = failedAttempts;
+
     }
 
     authenticate(pin) {
