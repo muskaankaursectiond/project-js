@@ -40,6 +40,24 @@ class BankingApp {
       JSON.stringify(this.pendingTransfers, null, 2)
     );
   }
+  async authenticateUser() {
+    let attempts = 0;
+    while (attempts < 3) {
+      const email = await promptInput("Enter your email: ");
+      const pin = await promptInput("Enter your PIN: ");
+
+      const user = this.users.find((user) => user.email === email);
+      if (user && user.authenticate(pin)) {
+        return user;
+      }
+
+      attempts++;
+      console.log("Invalid email or PIN. Try again.");
+    }
+
+    console.log("Too many failed attempts. Exiting.");
+    return null;
+  }
   
   async mainMenu(user) {
     while (true) {
@@ -55,6 +73,34 @@ class BankingApp {
       const choice = await promptInput("Choose an option: ");
 
       switch (choice) {
+        case "1":
+          console.log(`Your balance is: $${user.viewBalance()}`);
+          break;
+
+        case "2":
+          const depositAmount = await promptInput("Enter amount to deposit: ");
+          if (validateAmount(depositAmount)) {
+            user.deposit(parseFloat(depositAmount));
+            console.log("Deposit successful.");
+            console.log(`Your balance is: $${user.viewBalance()}`);
+          }
+          break;
+          
+        case "3":
+          const withdrawAmount = await promptInput(
+            "Enter amount to withdraw: "
+          );
+          if (
+            validateAmount(withdrawAmount) &&
+            user.withdraw(parseFloat(withdrawAmount))
+          ) {
+            console.log("Withdrawal successful.");
+            console.log(`Your balance is: $${user.viewBalance()}`);
+          } else {
+            console.log("Insufficient funds.");
+          }
+          break;
+        
         case "4":
           const recipientEmail = await promptInput("Enter recipient's email: ");
           const amountToSend = await promptInput("Enter amount to send: ");
@@ -126,6 +172,17 @@ class BankingApp {
 
           this.saveData();
           break;
+        
+        case "6":
+          const newPin = await promptInput("Enter new PIN: ");
+          user.pin = newPin;
+          console.log("PIN changed successfully.");
+          break;
+
+        case "7":
+          this.saveData();
+          console.log("Thank you for using the banking app. Goodbye!");
+          return;
         default:
           console.log("Invalid choice. Try again.");
       }
