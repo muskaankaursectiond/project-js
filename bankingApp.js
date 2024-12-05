@@ -58,6 +58,7 @@ class BankingApp {
     console.log("Too many failed attempts. Exiting.");
     return null;
   }
+  
   async mainMenu(user) {
     while (true) {
       console.log("\nMain Menu");
@@ -98,6 +99,78 @@ class BankingApp {
           } else {
             console.log("Insufficient funds.");
           }
+          break;
+        
+        case "4":
+          const recipientEmail = await promptInput("Enter recipient's email: ");
+          const amountToSend = await promptInput("Enter amount to send: ");
+          const securityQuestion = await promptInput(
+            "Set a security question for the recipient: "
+          );
+          const securityAnswer = await promptInput(
+            "Set the answer to the security question: "
+          );
+
+          if (!validateAmount(amountToSend)) {
+            console.log("Invalid amount. Please try again.");
+            break;
+          }
+
+          if (!user.withdraw(parseFloat(amountToSend))) {
+            console.log("Insufficient funds.");
+            break;
+          }
+
+          const recipientExists = this.users.find(
+            (u) => u.email === recipientEmail
+          );
+          if (!recipientExists) {
+            console.log("Recipient does not exist.");
+            break;
+          }
+
+          const transfer = new ETransfer(
+            user.email,
+            recipientEmail,
+            parseFloat(amountToSend),
+            securityQuestion,
+            securityAnswer
+          );
+
+          this.pendingTransfers.push(transfer);
+          console.log("E-Transfer sent successfully.");
+          this.saveData();
+          break;
+        case "5":
+          const incomingTransfers = this.pendingTransfers.filter(
+            (t) => t.recipient === user.email
+          );
+
+          if (incomingTransfers.length === 0) {
+            console.log("No pending e-transfers for your account.");
+            break;
+          }
+
+          for (const transfer of incomingTransfers) {
+            console.log(`From: ${transfer.sender}`);
+            console.log(`Amount: $${transfer.amount}`);
+            console.log(`Security Question: ${transfer.securityQuestion}`);
+
+            const answer = await promptInput(
+              "Enter the answer to the security question: "
+            );
+            if (transfer.validateAnswer(answer)) {
+              user.deposit(transfer.amount);
+              console.log("E-Transfer accepted successfully.");
+              this.pendingTransfers = this.pendingTransfers.filter(
+                (t) => t !== transfer
+              );
+            } else {
+              console.log("Incorrect answer. Transfer not accepted.");
+            }
+          }
+
+          this.saveData();
           break;
         
         case "6":
