@@ -14,7 +14,7 @@ class BankingApp {
     try {
       const usersData = fs.readFileSync("./users.json");
       this.users = JSON.parse(usersData).map(
-        (user) => new User(user.email, user.pin, user.balance)
+        (user) => new User(user.email, user.pin, user.balance, user.failedAttempts)
       );
 
       const transfersData = fs.readFileSync("./transfers.json");
@@ -40,24 +40,49 @@ class BankingApp {
       JSON.stringify(this.pendingTransfers, null, 2)
     );
   }
+  
   async authenticateUser() {
     let attempts = 0;
+  
     while (attempts < 3) {
       const email = await promptInput("Enter your email: ");
       const pin = await promptInput("Enter your PIN: ");
-
+  
       const user = this.users.find((user) => user.email === email);
-      if (user && user.authenticate(pin)) {
-        return user;
+  
+      if (!user) {
+        console.log("User not found!");
+        attempts++;
+        continue;
       }
-
-      attempts++;
-      console.log("Invalid email or PIN. Try again.");
+  
+      if (user.failedAttempts >= 10) {
+        console.log("Your account is permanently blocked due to too many failed attempts.");
+        return null;
+      }
+  
+      if (user.authenticate(pin)) {
+        console.log("Login successfully!");
+        user.failedAttempts = 0; // Reset failed attempts on successful login
+        this.saveData();
+        return user;
+      } else {
+        console.log("Incorrect PIN. Try again.");
+        user.failedAttempts = (user.failedAttempts || 0) + 1;
+        attempts++;
+        this.saveData();
+  
+        if (user.failedAttempts >= 10) {
+          console.log("Your account is permanently blocked due to too many failed attempts.");
+          return null;
+        }
+      }
     }
-
+  
     console.log("Too many failed attempts. Exiting.");
     return null;
   }
+  
   
   async mainMenu(user) {
     while (true) {
@@ -175,8 +200,13 @@ class BankingApp {
         
         case "6":
           const newPin = await promptInput("Enter new PIN: ");
+          const reEnterPin = await promptInput("re-Enter new PIN: ");
+          if(newPin === reEnterPin){
           user.pin = newPin;
           console.log("PIN changed successfully.");
+          }else{
+            console.log("Please enter the correct pin");
+          }
           break;
 
         case "7":

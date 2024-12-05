@@ -1,12 +1,14 @@
 [
   {
     "email": "muskaan@example.com",
-    "pin": "123",
-    "balance": 814
+    "pin": "12345",
+    "balance": 800,
+    "failedAttempts": 0
   },
   {
     "email": "gurpreet@example.com",
-    "pin": "123",
-    "balance": 2074
+    "pin": "456",
+    "balance": 2274,
+    "failedAttempts": 0
   }
 ]
