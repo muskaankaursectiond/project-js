@@ -1,0 +1,9 @@
+[
+  {
+    "sender": "muskaan@example.com",
+    "recipient": "user2@example.com",
+    "amount": 200,
+    "securityQuestion": "your favorite color",
+    "securityAnswer": "blue"
+  }
+]
