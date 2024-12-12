@@ -107,7 +107,7 @@ class BankingApp {
           if (validateAmount(depositAmount)) {
             user.deposit(parseFloat(depositAmount));
             console.log("Deposit successful.");
-            console.log(`Your balance is: $${user.viewBalance()}`);
+            console.log(`Your updated balance is: $${user.viewBalance()}`);
           }
           break;
           
@@ -120,7 +120,7 @@ class BankingApp {
             user.withdraw(parseFloat(withdrawAmount))
           ) {
             console.log("Withdrawal successful.");
-            console.log(`Your balance is: $${user.viewBalance()}`);
+            console.log(`Your updated balance is: $${user.viewBalance()}`);
           } else {
             console.log("Insufficient funds.");
           }
