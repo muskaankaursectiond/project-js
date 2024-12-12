@@ -62,7 +62,7 @@ class BankingApp {
             "Set a security question for the recipient: "
           );
           const securityAnswer = await promptInput(
-            "Set the answer to the security question: "
+            "Set the answer for the security purpose: "
           );
 
           if (!validateAmount(amountToSend)) {
